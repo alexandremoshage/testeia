@@ -8,7 +8,6 @@ namespace WindowsFormsApp2
 {
    public enum ECarta
     {
-        As = 0,
         Dois = 2,
         Tres = 3,
         Quatro = 4,
@@ -20,6 +19,7 @@ namespace WindowsFormsApp2
         Dez = 10,
         Valete = 11,
         Dama = 12,
-        Rei = 13
+        Rei = 13,
+        As = 14,
     }
 }

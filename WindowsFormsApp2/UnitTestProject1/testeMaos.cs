@@ -176,8 +176,6 @@ namespace UnitTestProject1
             Assert.AreEqual(true, mesa.jogadores[0].Mao == Mao.quadra && mesa.jogadores[1].Mao != Mao.quadra && mesa.jogadores[2].Mao != Mao.quadra);
         }
 
-
-
         [TestMethod]
         public void StragithflushJogador1()
         {
@@ -197,7 +195,6 @@ namespace UnitTestProject1
 
             Assert.AreEqual(true, mesa.jogadores[0].Mao == Mao.straigthFush && mesa.jogadores[1].Mao != Mao.straigthFush && mesa.jogadores[2].Mao != Mao.straigthFush);
         }
-
 
         [TestMethod]
         public void ParJogador1()
@@ -237,7 +234,6 @@ namespace UnitTestProject1
             Assert.AreEqual(true, mesa.jogadores[0].Mao == Mao.par);
         }
 
-
         [TestMethod]
         public void ParNaMaoSemBordoJogador1()
         {
@@ -251,7 +247,6 @@ namespace UnitTestProject1
 
             Assert.AreEqual(true, mesa.jogadores[0].Mao == Mao.par);
         }
-
 
         [TestMethod]
         public void TrincaFloop()
@@ -271,7 +266,6 @@ namespace UnitTestProject1
 
             Assert.AreEqual(true, mesa.jogadores[0].Mao == Mao.trinca);
         }
-
 
         [TestMethod]
         public void DoisParesJogador1()

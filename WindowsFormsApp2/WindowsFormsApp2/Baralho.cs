@@ -60,8 +60,5 @@ namespace WindowsFormsApp2
         }
 
     }
-
-
-
-
+     
 }

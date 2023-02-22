@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace WindowsFormsApp2
 {
@@ -168,16 +169,16 @@ namespace WindowsFormsApp2
                 cartasJogador.AddRange(bordo);
                 cartasJogador.AddRange(jogadorNaMao.CartasMao);
 
-                var (isFlush, nipe) = VerificarFlush(cartasJogador);
+                var (isFlush, mao, nipe) = VerificarFlushOpenIA(cartasJogador);
                 var (isSequencia, sequencia) = VerificarSequencia(cartasJogador);
 
-                if (isSequencia && isFlush && VerificarStragithFlush(cartasJogador, nipe.Value))
+                if (isSequencia && isFlush && VerificarStraightFlush(cartasJogador, nipe.Value).Item1)
                 {
                     jogadorNaMao.Mao = Mao.straigthFush;
                     continue;
                 }
 
-                if (VerificarQuadra(cartasJogador))
+                if (VerificarQuadraOpenIa(cartasJogador).Item1)
                 {
                     jogadorNaMao.Mao = Mao.quadra;
                     continue;
@@ -219,41 +220,53 @@ namespace WindowsFormsApp2
 
         #region resultadoMaos
 
-        private (bool, int[]) VerificarSequencia(List<Carta> cartas)
+        private (bool, List<ECarta>) VerificarSequencia(List<Carta> cartas)
         {
-            List<int> cartasOrdenadas = cartas.Select(x => (int)x.Numero).OrderBy(x => x).Distinct().ToList();
-            List<int> cartasOrdenadasComAsNoFim = new List<int>();
+
+            List<ECarta> cartasOrdenadas = cartas.OrderBy(x=> x.Numero).Select(x => x.Numero).Distinct().ToList();
+            var temSequencia = false;
+            var sequencia = new List<ECarta>();
             if (cartasOrdenadas.Count() < 5)
+            {
                 return (false, null);
 
-            var temAs = cartasOrdenadas.Where(x => x == 0).Any();
-            if (temAs)
-            {
-                cartasOrdenadasComAsNoFim = cartas.Select(x => (int)x.Numero).OrderBy(x => x).Distinct().ToList();
-                for (int i = 0; i < cartasOrdenadas.Count() - 4; i++)
-                {
-                    if (cartasOrdenadas[i] == 0)
-                    {
-                        cartasOrdenadas[i] = 1;
-                        cartasOrdenadasComAsNoFim[i] = 14;
-                    }
-                }
             }
+
 
             for (int i = 0; i < cartasOrdenadas.Count() - 4; i++)
             {
-                if (IsSequential(new int[] { cartasOrdenadas[i], cartasOrdenadas[i + 1], cartasOrdenadas[i + 2], cartasOrdenadas[i + 3], cartasOrdenadas[i + 4] }))
-                    return (true, new int[] { cartasOrdenadas[i], cartasOrdenadas[i + 1], cartasOrdenadas[i + 2], cartasOrdenadas[i + 3], cartasOrdenadas[i + 4] });
 
-                if (temAs)
+                if (cartasOrdenadas[0] == ECarta.As &&
+                    cartasOrdenadas[i + 1] == ECarta.Dois &&
+                    cartasOrdenadas[i + 2] == ECarta.Tres &&
+                    cartasOrdenadas[i + 3] == ECarta.Quatro &&
+                    cartasOrdenadas[i + 4] == ECarta.Cinco)
                 {
-                    cartasOrdenadasComAsNoFim = cartasOrdenadasComAsNoFim.OrderBy(x => x).ToList();
-                    if (IsSequential(new int[] { cartasOrdenadasComAsNoFim[i], cartasOrdenadasComAsNoFim[i + 1], cartasOrdenadasComAsNoFim[i + 2], cartasOrdenadasComAsNoFim[i + 3], cartasOrdenadasComAsNoFim[i + 4] }))
-                        return (true, new int[] { cartasOrdenadasComAsNoFim[i], cartasOrdenadasComAsNoFim[i + 1], cartasOrdenadasComAsNoFim[i + 2], cartasOrdenadasComAsNoFim[i + 3], cartasOrdenadasComAsNoFim[i + 4] });
+                    temSequencia = true;
+                    sequencia = new List<ECarta>() { cartasOrdenadas[0], cartasOrdenadas[i + 1], cartasOrdenadas[i + 2], cartasOrdenadas[i + 3], cartasOrdenadas[i + 4] };
+                    return (true, sequencia);
+                }
+
+                if (IsSequential(new int[] {(int) cartasOrdenadas[i],
+                                            (int)cartasOrdenadas[i + 1],
+                                            (int)cartasOrdenadas[i + 2],
+                                            (int)cartasOrdenadas[i + 3],
+                                            (int)cartasOrdenadas[i + 4] }))
+                {
+
+                    temSequencia = true;
+                    sequencia = new List<ECarta>() { cartasOrdenadas[i], cartasOrdenadas[i + 1], cartasOrdenadas[i + 2], cartasOrdenadas[i + 3], cartasOrdenadas[i + 4] };
                 }
             }
 
+
+            if (temSequencia)
+            {
+                return (true, sequencia);
+            }
+
             return (false, null);
+
         }
 
         private (bool, ENipe?) VerificarFlush(List<Carta> cartas)
@@ -350,49 +363,54 @@ namespace WindowsFormsApp2
             return false;
         }
 
-        private bool VerificarStragithFlush(List<Carta> cartas, ENipe nipe)
+        public (bool, List<Carta>) VerificarStraightFlush(List<Carta> cartas, ENipe nipe)
         {
-
-            List<Carta> cartasNipeFlush = cartas.Where(x => x.Nipe == nipe).OrderBy(x => x.Numero).ToList();
-            if (cartasNipeFlush.Count < 5)
-                return false;
-
-            List<int> cartasOrdenadas = cartasNipeFlush.Select(x => (int)x.Numero).OrderBy(x => x).Distinct().ToList();
-            if (cartasOrdenadas.Count < 5)
-                return false;
-
-            List<int> cartasOrdenadasComAsNoFim = new List<int>();
+            List<Carta> cartasOrdenadas = cartas.Where(x => x.Nipe == nipe).OrderBy(c => c.Numero).ToList();
+            var temSequencia = false;
+            var sequencia = new List<Carta>();
             if (cartasOrdenadas.Count() < 5)
-                return false;
-
-            var temAs = cartasOrdenadas.Where(x => x == 0).Any();
-            if (temAs)
             {
-                cartasOrdenadasComAsNoFim = cartasNipeFlush.Select(x => (int)x.Numero).OrderBy(x => x).Distinct().ToList();
-                for (int i = 0; i < cartasOrdenadas.Count() - 4; i++)
-                {
-                    if (cartasOrdenadas[i] == 0)
-                    {
-                        cartasOrdenadas[i] = 1;
-                        cartasOrdenadasComAsNoFim[i] = 14;
-                    }
-                }
+                return (false, null);
+
             }
+
 
             for (int i = 0; i < cartasOrdenadas.Count() - 4; i++)
             {
-                if (IsSequential(new int[] { cartasOrdenadas[i], cartasOrdenadas[i + 1], cartasOrdenadas[i + 2], cartasOrdenadas[i + 3], cartasOrdenadas[i + 4] }))
-                    return true;
 
-                if (temAs)
+                if (cartasOrdenadas[0].Numero == ECarta.As &&
+                    cartasOrdenadas[i + 1].Numero == ECarta.Dois &&
+                    cartasOrdenadas[i + 2].Numero == ECarta.Tres &&
+                    cartasOrdenadas[i + 3].Numero == ECarta.Quatro &&
+                    cartasOrdenadas[i + 4].Numero == ECarta.Cinco)
                 {
-                    cartasOrdenadasComAsNoFim = cartasOrdenadasComAsNoFim.OrderBy(x => x).ToList();
-                    if (IsSequential(new int[] { cartasOrdenadasComAsNoFim[i], cartasOrdenadasComAsNoFim[i + 1], cartasOrdenadasComAsNoFim[i + 2], cartasOrdenadasComAsNoFim[i + 3], cartasOrdenadasComAsNoFim[i + 4] }))
-                        return true;
+                    temSequencia = true;
+                    sequencia = new List<Carta>() { cartasOrdenadas[0], cartasOrdenadas[i + 1], cartasOrdenadas[i + 2], cartasOrdenadas[i + 3], cartasOrdenadas[i + 4] };
                 }
+
+
+
+                if (IsSequential(new int[] {(int) cartasOrdenadas[i].Numero,
+                                            (int)cartasOrdenadas[i + 1].Numero,
+                                            (int)cartasOrdenadas[i + 2].Numero,
+                                            (int)cartasOrdenadas[i + 3].Numero,
+                                            (int)cartasOrdenadas[i + 4].Numero }))
+                {
+
+                    temSequencia = true;
+                    sequencia = new List<Carta>() { cartasOrdenadas[i], cartasOrdenadas[i + 1], cartasOrdenadas[i + 2], cartasOrdenadas[i + 3], cartasOrdenadas[i + 4] };
+                }
+
             }
 
-            return false;
+
+            if (temSequencia)
+            {
+                return (true, sequencia);
+            }
+
+            return (false, null);
+
         }
 
         private bool IsSequential(int[] a)
@@ -400,5 +418,51 @@ namespace WindowsFormsApp2
             return Enumerable.Range(1, a.Length - 1).All(i => a[i] - 1 == a[i - 1]);
         }
         #endregion
+
+
+        public (bool, List<Carta>, ENipe?) VerificarFlushOpenIA(List<Carta> cartas)
+        {
+
+            // verifica se existem 5 cartas do mesmo nipe
+            var flush = cartas.GroupBy(c => c.Nipe)
+                              .Where(g => g.Count() >= 5)
+                              .FirstOrDefault();
+
+            if (flush != null)
+            {
+                // ordena as cartas em ordem decrescente e filtra as 5 melhores
+                var melhoresCartas = flush.OrderByDescending(c => (int)c.Numero)
+                                          .Take(5)
+                                          .ToList();
+
+                return (true, melhoresCartas, melhoresCartas[0].Nipe);
+            }
+
+            return (false, new List<Carta>(), null);
+        }
+
+
+        public (bool, List<Carta>) VerificarQuadraOpenIa(List<Carta> cartas)
+        {
+            var grupos = cartas.GroupBy(carta => carta.Numero).ToList();
+            var quadra = grupos.FirstOrDefault(g => g.Count() == 4);
+            var kicker = grupos.Where(g => g.Count() == 1)
+                              .OrderByDescending(g => (int)g.Key)
+                              .FirstOrDefault()?.ToList();
+
+            if (quadra != null)
+            {
+                var cartasMao = quadra.ToList();
+                cartasMao.AddRange(kicker);
+                return (true, cartasMao);
+            }
+            else
+            {
+                return (false, null);
+            }
+        }
+
+
+
     }
 }
