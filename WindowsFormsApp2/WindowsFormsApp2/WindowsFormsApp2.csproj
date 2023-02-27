@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Baralho.cs" />
+    <Compile Include="CalculaMaos.cs" />
     <Compile Include="ENipe.cs" />
     <Compile Include="ECarta.cs" />
     <Compile Include="Form1.cs">

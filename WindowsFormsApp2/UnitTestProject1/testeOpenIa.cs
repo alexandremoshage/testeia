@@ -24,7 +24,7 @@ namespace UnitTestProject1
                 new Carta(ECarta.Sete, ENipe.Copas)
             };
 
-            var (ehFlush, cartasDaMao, nipe) = new Mesa().VerificarFlushOpenIA(cartas);
+            var (ehFlush, cartasDaMao, nipe) = new CalculaMaos().VerificarFlushOpenIA(cartas);
 
             Assert.IsTrue(ehFlush);
             Assert.AreEqual(cartasDaMao.Count, 5);
@@ -34,8 +34,6 @@ namespace UnitTestProject1
             Assert.AreEqual(cartasDaMao[3].Numero, ECarta.Sete);
             Assert.AreEqual(cartasDaMao[4].Numero, ECarta.Seis);
         }
-
-
 
         [TestMethod]
         public void TestFlushInvalido()
@@ -51,13 +49,10 @@ namespace UnitTestProject1
                 new Carta(ECarta.Sete, ENipe.Copas)
             };
 
-            var (ehFlush, cartasDaMao, nipe) = new Mesa().VerificarFlushOpenIA(cartas);
+            var (ehFlush, cartasDaMao, nipe) = new CalculaMaos().VerificarFlushOpenIA(cartas);
 
             Assert.AreEqual(ehFlush, false);
         }
-
-
-
 
         [TestMethod]
         public void TestVerificarQuadra_True()
@@ -76,7 +71,7 @@ namespace UnitTestProject1
 
 
             // Act
-            var resultado = new Mesa().VerificarQuadraOpenIa(cartas).Item1;
+            var resultado = new CalculaMaos().VerificarQuadraOpenIa(cartas).Item1;
 
             // Assert
             Assert.IsTrue(resultado);
@@ -97,13 +92,10 @@ namespace UnitTestProject1
                 new Carta(ECarta.Sete, ENipe.Copas)
             };
 
-            var resultado = new Mesa().VerificarQuadraOpenIa(cartas).Item1;
+            var resultado = new CalculaMaos().VerificarQuadraOpenIa(cartas).Item1;
 
             Assert.AreEqual(false, resultado);
         }
-
-
-
 
         [TestMethod]
         public void TestVerificarKicker()
@@ -120,13 +112,10 @@ namespace UnitTestProject1
                 new Carta(ECarta.Sete, ENipe.Copas)
             };
 
-            var mao = new Mesa().VerificarQuadraOpenIa(cartas).Item2;
+            var mao = new CalculaMaos().VerificarQuadraOpenIa(cartas).Item2;
 
             Assert.AreEqual(ECarta.Sete, mao[4].Numero);
         }
-
-
-
 
         [TestMethod]
         public void TestVerificarKickerAs()
@@ -143,13 +132,10 @@ namespace UnitTestProject1
                 new Carta(ECarta.Sete, ENipe.Copas)
             };
 
-            var mao = new Mesa().VerificarQuadraOpenIa(cartas).Item2;
+            var mao = new CalculaMaos().VerificarQuadraOpenIa(cartas).Item2;
 
             Assert.AreEqual(ECarta.As, mao[4].Numero);
         }
-
-
-
 
         [TestMethod]
         public void VerificarStraightFlush_DeveRetornarTrueParaStraightFlush()
@@ -166,7 +152,7 @@ namespace UnitTestProject1
                 new Carta(ECarta.Sete, ENipe.Ouro)
             };
 
-            var (resultado, cartasStraightFlush) = new Mesa().VerificarStraightFlush(cartas, ENipe.Ouro);
+            var (resultado, cartasStraightFlush) = new CalculaMaos().VerificarStraightFlush(cartas, ENipe.Ouro);
 
             Assert.IsTrue(resultado);
             Assert.AreEqual(5, cartasStraightFlush.Count);
@@ -193,13 +179,10 @@ namespace UnitTestProject1
             new Carta(ECarta.Sete, ENipe.Ouro)
         };
 
-            bool resultado = new Mesa().VerificarStraightFlush(cartas, ENipe.Ouro).Item1;
+            bool resultado = new CalculaMaos().VerificarStraightFlush(cartas, ENipe.Ouro).Item1;
 
             Assert.IsFalse(resultado);
         }
-
-
-         
 
     }
 }
