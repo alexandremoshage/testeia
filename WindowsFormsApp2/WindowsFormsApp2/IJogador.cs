@@ -15,11 +15,9 @@ namespace WindowsFormsApp2
         bool IsNaMao { get; set; }
         decimal Fichas { get; set; }
         EPosicao Posicao { get; set; }
-        EAcao Acao { get; set; }
 
         (EAcao, decimal) AcaoJogador();
 
-        (EAcao, decimal) AcaoJogador(EAcao acao, decimal valor);
-
+        void SetarAcaoJogador(EAcao EAcao,  decimal valor);
     }
 }

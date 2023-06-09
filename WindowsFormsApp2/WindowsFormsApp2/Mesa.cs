@@ -36,108 +36,7 @@ namespace WindowsFormsApp2
         }
         public void ProximaAcao()
         {
-            var jogadoresNaMao = jogadores.Where(x => x.IsNaMao).ToList();
-            var smal = jogadoresNaMao.Where(x => x.Posicao == EPosicao.small).FirstOrDefault();
-            var big = jogadoresNaMao.Where(x => x.Posicao == EPosicao.big).FirstOrDefault();
-            var botao = jogadoresNaMao.Where(x => x.Posicao == EPosicao.botao).FirstOrDefault();
-
-            var jogadorNaAcao = ObterJogadorProximaAcao(jogadoresNaMao);
-            var (acao, valor) = jogadorNaAcao.AcaoJogador();
-            if (acao == EAcao.raise)
-            {
-                JogadorUltimoRaise = jogadorNaAcao;
-                AtualizarFila(smal, big, botao, jogadorNaAcao);
-            }
-
-            if (acao == EAcao.fold)
-            {
-                jogadorNaAcao.IsNaMao = false;
-            }
-
-            if (acao == EAcao.check)
-            {
-                //por equanto não faz nada
-            }
-
-
-            if (acao == EAcao.call)
-            {
-                //por equanto não faz nada
-            }
-        }
-
-        private void AtualizarFila(IJogador smal, IJogador big, IJogador botao, IJogador jogadorNaAcao)
-        {
-            if (jogadorNaAcao.Posicao == EPosicao.botao)
-            {
-                if (smal != null)
-                    filaAcaoJogadores.Add(smal);
-
-                if (big != null)
-                    filaAcaoJogadores.Add(big);
-            }
-
-            if (jogadorNaAcao.Posicao == EPosicao.small)
-            {
-                if (big != null)
-                    filaAcaoJogadores.Add(big);
-
-                if (botao != null)
-                    filaAcaoJogadores.Add(botao);
-            }
-
-            if (jogadorNaAcao.Posicao == EPosicao.big)
-            {
-                if (botao != null)
-                    filaAcaoJogadores.Add(botao);
-
-                if (smal != null)
-                    filaAcaoJogadores.Add(smal);
-            }
-        }
-
-        public IJogador ObterJogadorProximaAcao(List<IJogador> p_jogadoresNaMao)
-        {
-
-            if (filaAcaoJogadores == null)
-            {
-                filaAcaoJogadores = new List<IJogador>();
-                filaAcaoJogadores.Add(p_jogadoresNaMao.Where(x => x.Posicao == EPosicao.small).FirstOrDefault());
-                filaAcaoJogadores.Add(p_jogadoresNaMao.Where(x => x.Posicao == EPosicao.big).FirstOrDefault());
-                return p_jogadoresNaMao.Where(x => x.Posicao == EPosicao.botao).FirstOrDefault();
-            }
-            else
-            {
-                var proximoJogador = filaAcaoJogadores.FirstOrDefault();
-                filaAcaoJogadores.RemoveAt(0);
-                return proximoJogador;
-            }
-        }
-
-        public void SortearBotao()
-        {
-
-            int botao = 1;
-            if (botao == 1)
-            {
-                jogadores[0].Posicao = EPosicao.botao;
-                jogadores[1].Posicao = EPosicao.small;
-                jogadores[2].Posicao = EPosicao.big;
-            }
-
-            if (botao == 2)
-            {
-                jogadores[0].Posicao = EPosicao.big;
-                jogadores[1].Posicao = EPosicao.botao;
-                jogadores[2].Posicao = EPosicao.small;
-            }
-
-            if (botao == 3)
-            {
-                jogadores[0].Posicao = EPosicao.small;
-                jogadores[1].Posicao = EPosicao.big;
-                jogadores[2].Posicao = EPosicao.botao;
-            }
+      
         }
 
         public void DistribuirFloop()
@@ -159,27 +58,24 @@ namespace WindowsFormsApp2
 
         public void CalcularGanhador()
         {
-
-
             List<IJogador> jogadoresNaMao = jogadores.Where(x => x.IsNaMao).ToList();
-
-
             foreach (var jogadorNaMao in jogadoresNaMao)
             {
                 List<Carta> cartasJogador = new List<Carta>();
                 cartasJogador.AddRange(bordo);
                 cartasJogador.AddRange(jogadorNaMao.CartasMao);
+                IOrderedEnumerable<Carta> cartasOrdenadas = cartasJogador.OrderBy(x => x.Numero);
 
-                var (isFlush, mao, nipe) = calculaMaos.VerificarFlushOpenIA(cartasJogador);
-                var (isSequencia, sequencia) = calculaMaos.VerificarSequencia(cartasJogador);
+                var (isFlush, mao, nipe) = calculaMaos.VerificarFlushOpenIA(cartasOrdenadas);
+                var (isSequencia, sequencia) = calculaMaos.VerificarSequencia(cartasOrdenadas);
 
-                if (isSequencia && isFlush && calculaMaos.VerificarStraightFlush(cartasJogador, nipe.Value).Item1)
+                if (isSequencia && isFlush && calculaMaos.VerificarStraightFlush(cartasOrdenadas, nipe.Value).Item1)
                 {
                     jogadorNaMao.Mao = Mao.straigthFush;
                     continue;
                 }
 
-                if (calculaMaos.VerificarQuadraOpenIa(cartasJogador).Item1)
+                if (calculaMaos.VerificarQuadraOpenIa(cartasOrdenadas).Item1)
                 {
                     jogadorNaMao.Mao = Mao.quadra;
                     continue;
@@ -198,19 +94,19 @@ namespace WindowsFormsApp2
                 }
 
 
-                if (calculaMaos.VerificarTrinca(cartasJogador))
+                if (calculaMaos.VerificarTrinca(cartasOrdenadas).Item1)
                 {
                     jogadorNaMao.Mao = Mao.trinca;
                     continue;
                 }
 
-                if (calculaMaos.VerificarDoisPares(cartasJogador))
+                if (calculaMaos.VerificarDoisPares(cartasOrdenadas).Item1)
                 {
                     jogadorNaMao.Mao = Mao.doisPares;
                     continue;
                 }
 
-                if (calculaMaos.VerificarPar(cartasJogador))
+                if (calculaMaos.VerificarPar(cartasOrdenadas).Item1)
                 {
                     jogadorNaMao.Mao = Mao.par;
                     continue;
@@ -218,8 +114,6 @@ namespace WindowsFormsApp2
             }
 
         }
-
-
 
     }
 }

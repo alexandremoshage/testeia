@@ -24,7 +24,7 @@ namespace UnitTestProject1
                 new Carta(ECarta.Sete, ENipe.Copas)
             };
 
-            var (ehFlush, cartasDaMao, nipe) = new CalculaMaos().VerificarFlushOpenIA(cartas);
+            var (ehFlush, cartasDaMao, nipe) = new CalculaMaos().VerificarFlushOpenIA(cartas.OrderBy(x => x.Numero));
 
             Assert.IsTrue(ehFlush);
             Assert.AreEqual(cartasDaMao.Count, 5);
@@ -49,7 +49,7 @@ namespace UnitTestProject1
                 new Carta(ECarta.Sete, ENipe.Copas)
             };
 
-            var (ehFlush, cartasDaMao, nipe) = new CalculaMaos().VerificarFlushOpenIA(cartas);
+            var (ehFlush, cartasDaMao, nipe) = new CalculaMaos().VerificarFlushOpenIA(cartas.OrderBy(x => x.Numero));
 
             Assert.AreEqual(ehFlush, false);
         }
@@ -71,7 +71,7 @@ namespace UnitTestProject1
 
 
             // Act
-            var resultado = new CalculaMaos().VerificarQuadraOpenIa(cartas).Item1;
+            var resultado = new CalculaMaos().VerificarQuadraOpenIa(cartas.OrderBy(x => x.Numero)).Item1;
 
             // Assert
             Assert.IsTrue(resultado);
@@ -92,7 +92,7 @@ namespace UnitTestProject1
                 new Carta(ECarta.Sete, ENipe.Copas)
             };
 
-            var resultado = new CalculaMaos().VerificarQuadraOpenIa(cartas).Item1;
+            var resultado = new CalculaMaos().VerificarQuadraOpenIa(cartas.OrderBy(x => x.Numero)).Item1;
 
             Assert.AreEqual(false, resultado);
         }
@@ -112,7 +112,7 @@ namespace UnitTestProject1
                 new Carta(ECarta.Sete, ENipe.Copas)
             };
 
-            var mao = new CalculaMaos().VerificarQuadraOpenIa(cartas).Item2;
+            var mao = new CalculaMaos().VerificarQuadraOpenIa(cartas.OrderBy(x => x.Numero)).Item2;
 
             Assert.AreEqual(ECarta.Sete, mao[4].Numero);
         }
@@ -132,7 +132,7 @@ namespace UnitTestProject1
                 new Carta(ECarta.Sete, ENipe.Copas)
             };
 
-            var mao = new CalculaMaos().VerificarQuadraOpenIa(cartas).Item2;
+            var mao = new CalculaMaos().VerificarQuadraOpenIa(cartas.OrderBy(x => x.Numero)).Item2;
 
             Assert.AreEqual(ECarta.As, mao[4].Numero);
         }
@@ -152,7 +152,7 @@ namespace UnitTestProject1
                 new Carta(ECarta.Sete, ENipe.Ouro)
             };
 
-            var (resultado, cartasStraightFlush) = new CalculaMaos().VerificarStraightFlush(cartas, ENipe.Ouro);
+            var (resultado, cartasStraightFlush) = new CalculaMaos().VerificarStraightFlush(cartas.OrderBy(x => x.Numero), ENipe.Ouro);
 
             Assert.IsTrue(resultado);
             Assert.AreEqual(5, cartasStraightFlush.Count);
@@ -179,9 +179,33 @@ namespace UnitTestProject1
             new Carta(ECarta.Sete, ENipe.Ouro)
         };
 
-            bool resultado = new CalculaMaos().VerificarStraightFlush(cartas, ENipe.Ouro).Item1;
+            bool resultado = new CalculaMaos().VerificarStraightFlush(cartas.OrderBy(x => x.Numero), ENipe.Ouro).Item1;
 
             Assert.IsFalse(resultado);
+        }
+
+
+
+        [TestMethod]
+        public void TestVerificarTrica_True()
+        {
+            // Arrange
+            var cartas = new List<Carta>
+            {
+                new Carta(ECarta.As, ENipe.Copas),
+                new Carta(ECarta.As, ENipe.Ouro),
+                new Carta(ECarta.As, ENipe.Paus),
+                new Carta(ECarta.Seis, ENipe.Copas),
+                new Carta(ECarta.Sete, ENipe.Ouro),
+                new Carta(ECarta.Oito, ENipe.Paus),
+                new Carta(ECarta.Rei, ENipe.Paus),
+            };
+
+            // Act
+            var resultado = new CalculaMaos().VerificarTrinca(cartas.OrderBy(x => x.Numero));
+
+            // Assert
+            Assert.IsTrue(resultado.Item1);
         }
 
     }

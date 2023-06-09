@@ -15,7 +15,8 @@ namespace WindowsFormsApp2
         private Boolean isNaMao = true;
         private decimal fichas = 25;
         private EPosicao posicao = 0;
-        private EAcao acao = 0;
+        private EAcao AcaoSetada = 0;
+        private decimal ValorAcaoSetada = 0;
 
         public int Id { get => id; set => id = value; }
         public List<Carta> CartasMao { get => cartasMao; set => cartasMao = value; }
@@ -24,7 +25,6 @@ namespace WindowsFormsApp2
         public bool IsNaMao { get => isNaMao; set => isNaMao = value; }
         public decimal Fichas { get => fichas; set => fichas = value; }
         public EPosicao Posicao { get => posicao; set => posicao = value; }
-        public EAcao Acao { get => acao; set => acao = value; }
 
         public Jogador(List<Carta> _cartasMao, int id)
         {
@@ -32,67 +32,24 @@ namespace WindowsFormsApp2
             this.Id = id;
         }
 
+ 
+
         public (EAcao, decimal) AcaoJogador()
         {
-
-            return (EAcao.check, 0);
+            if ( AcaoSetada != null)
+            {
+                return (AcaoSetada, ValorAcaoSetada);
+            }
+            else
+            {
+                throw new NotImplementedException("falta implementar ia");    
+            }
         }
 
-        public (EAcao, decimal) AcaoJogador(EAcao acao, decimal valor)
+        public void SetarAcaoJogador(EAcao EAcao, decimal valor)
         {
-            if (acao == EAcao.fold)
-            {
-                return (EAcao.fold, 0);
-            }
-
-            if (acao == EAcao.check)
-            {
-                return (EAcao.check, 0);
-            }
-
-            if (acao == EAcao.call)
-            {
-                Fichas = Fichas - valor;
-                return (EAcao.call, valor);
-            }
-
-            if (acao == EAcao.raise)
-            {
-                Fichas = Fichas - valor;
-                return (EAcao.raise, valor);
-            }
-
-            return (EAcao.check, 0);
+            AcaoSetada = EAcao;
+            ValorAcaoSetada = valor;
         }
-
-
-    }
-
-    public enum Mao
-    {
-        nada = 0,
-        par = 1,
-        doisPares = 2,
-        trinca = 3,
-        sequencia = 4,
-        flush = 5,
-        fullHouse = 6,
-        quadra = 7,
-        straigthFush = 8
-    }
-
-    public enum EPosicao
-    {
-        botao = 0,
-        small = 1,
-        big = 2
-    }
-
-    public enum EAcao
-    {
-        fold = 0,
-        check = 1,
-        call = 2,
-        raise = 3
     }
 }

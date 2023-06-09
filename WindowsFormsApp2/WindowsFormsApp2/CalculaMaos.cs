@@ -10,7 +10,7 @@ namespace WindowsFormsApp2
     {
         #region resultadoMaos
 
-        public (bool, List<ECarta>) VerificarSequencia(List<Carta> cartas)
+        public (bool, List<ECarta>) VerificarSequencia(IOrderedEnumerable<Carta> cartas)
         {
 
             List<ECarta> cartasOrdenadas = cartas.OrderBy(x => x.Numero).Select(x => x.Numero).Distinct().ToList();
@@ -26,11 +26,11 @@ namespace WindowsFormsApp2
             for (int i = 0; i < cartasOrdenadas.Count() - 4; i++)
             {
 
-                if (cartasOrdenadas[0] == ECarta.As &&
-                    cartasOrdenadas[i + 1] == ECarta.Dois &&
-                    cartasOrdenadas[i + 2] == ECarta.Tres &&
-                    cartasOrdenadas[i + 3] == ECarta.Quatro &&
-                    cartasOrdenadas[i + 4] == ECarta.Cinco)
+                if (cartasOrdenadas.Last() == ECarta.As &&
+                    cartasOrdenadas[i] == ECarta.Dois &&
+                    cartasOrdenadas[i + 1] == ECarta.Tres &&
+                    cartasOrdenadas[i + 2] == ECarta.Quatro &&
+                    cartasOrdenadas[i + 3] == ECarta.Cinco)
                 {
                     temSequencia = true;
                     sequencia = new List<ECarta>() { cartasOrdenadas[0], cartasOrdenadas[i + 1], cartasOrdenadas[i + 2], cartasOrdenadas[i + 3], cartasOrdenadas[i + 4] };
@@ -59,7 +59,7 @@ namespace WindowsFormsApp2
 
         }
 
-        public (bool, ENipe?) VerificarFlush(List<Carta> cartas)
+        public (bool, ENipe?) VerificarFlush(IOrderedEnumerable<Carta> cartas)
         {
             if (cartas.Count() < 5)
                 return (false, null);
@@ -76,119 +76,102 @@ namespace WindowsFormsApp2
             return (false, null);
         }
 
-        public bool VerificarTrinca(List<Carta> cartas)
+        public (bool, List<Carta>) VerificarTrinca(IOrderedEnumerable<Carta> cartas)
         {
-            if (cartas.Count() < 3)
-                return false;
+            var grupos = cartas.GroupBy(carta => carta.Numero).ToList();
+            var trinca = grupos.FirstOrDefault(g => g.Count() == 3);
 
-            List<Carta> cartasOrd = cartas.OrderBy(x => x.Numero).ToList();
-
-            for (int i = 0; i < cartas.Count() - 2; i++)
+            if (trinca != null)
             {
-                if (cartasOrd[i].Numero == cartasOrd[i + 1].Numero && cartasOrd[i].Numero == cartasOrd[i + 2].Numero)
-                    return true;
+                var kicker = cartas.Where(x => !trinca.Contains(x)).Reverse().Take(2);
+                var cartasMao = trinca.ToList();
+                cartasMao.AddRange(kicker);
+                return (true, cartasMao);
             }
-
-
-            return false;
+            else
+            {
+                return (false, null);
+            }
         }
 
-        public bool VerificarDoisPares(List<Carta> cartas)
+        public (bool, List<Carta>) VerificarDoisPares(IOrderedEnumerable<Carta> cartas)
         {
-            if (cartas.Count() < 2)
-                return false;
+            if (cartas.Count() < 5)
+                return (false, null);
 
-            List<Carta> cartasOrd = cartas.OrderBy(x => x.Numero).ToList();
+            var grupos = cartas.Reverse().GroupBy(carta => carta.Numero).ToList();
+            var pares = grupos.Where(g => g.Count() == 2);
 
-            for (int i = 0; i < cartas.Count() - 1; i++)
+            if (pares.Count() > 1)
             {
-                if (cartasOrd[i].Numero == cartasOrd[i + 1].Numero)
-                {
-                    for (int j = i + 2; j < cartas.Count() - 1; j++)
-                    {
-                        if (cartasOrd[j].Numero == cartasOrd[j + 1].Numero)
-                        {
-                            return true;
-                        }
-                    }
-                    return false;
-                }
+
+                List<Carta> cartasMao = new List<Carta>();
+                cartasMao.AddRange(pares.ToList()[0]);
+                cartasMao.AddRange(pares.ToList()[1]);
+                var kicker = cartas.Where(x => !cartasMao.Contains(x)).Reverse().FirstOrDefault();
+
+                return (true, cartasMao);
             }
-
-
-            return false;
+            else
+            {
+                return (false, null);
+            }
         }
 
-        public bool VerificarPar(List<Carta> cartas)
+        public (bool, List<Carta>) VerificarPar(IOrderedEnumerable<Carta> cartas)
         {
-            if (cartas.Count() < 2)
-                return false;
+            var grupos = cartas.GroupBy(carta => carta.Numero).ToList();
+            var par = grupos.FirstOrDefault(g => g.Count() == 2);
 
-            List<Carta> cartasOrd = cartas.OrderBy(x => x.Numero).ToList();
-
-            for (int i = 0; i < cartas.Count() - 1; i++)
+            if (par != null)
             {
-                if (cartasOrd[i].Numero == cartasOrd[i + 1].Numero)
-                    return true;
+                var kicker = cartas.Where(x => !par.Contains(x)).Reverse().Take(3);
+                var cartasMao = par.ToList();
+                cartasMao.AddRange(kicker);
+                return (true, cartasMao);
             }
-
-
-            return false;
+            else
+            {
+                return (false, null);
+            }
         }
 
-        public bool VerificarQuadra(List<Carta> cartas)
+        public (bool, List<Carta>) VerificarStraightFlush(IOrderedEnumerable<Carta> cartas, ENipe nipe)
         {
-            if (cartas.Count() < 4)
-                return false;
-
-            List<Carta> cartasOrd = cartas.OrderBy(x => x.Numero).ToList();
-
-            for (int i = 0; i < cartas.Count() - 3; i++)
-            {
-                if (cartasOrd[i].Numero == cartasOrd[i + 1].Numero && cartasOrd[i].Numero == cartasOrd[i + 2].Numero && cartasOrd[i].Numero == cartasOrd[i + 3].Numero)
-                    return true;
-            }
-
-
-            return false;
-        }
-
-        public (bool, List<Carta>) VerificarStraightFlush(List<Carta> cartas, ENipe nipe)
-        {
-            List<Carta> cartasOrdenadas = cartas.Where(x => x.Nipe == nipe).OrderBy(c => c.Numero).ToList();
+            List<Carta> cartasMesmoNipe = cartas.Where(x => x.Nipe == nipe).ToList();
             var temSequencia = false;
             var sequencia = new List<Carta>();
-            if (cartasOrdenadas.Count() < 5)
+            if (cartasMesmoNipe.Count() < 5)
             {
                 return (false, null);
 
             }
 
 
-            for (int i = 0; i < cartasOrdenadas.Count() - 4; i++)
+            for (int i = 0; i < cartasMesmoNipe.Count() - 4; i++)
             {
 
-                if (cartasOrdenadas[0].Numero == ECarta.As &&
-                    cartasOrdenadas[i + 1].Numero == ECarta.Dois &&
-                    cartasOrdenadas[i + 2].Numero == ECarta.Tres &&
-                    cartasOrdenadas[i + 3].Numero == ECarta.Quatro &&
-                    cartasOrdenadas[i + 4].Numero == ECarta.Cinco)
+                if (cartasMesmoNipe.Last().Numero == ECarta.As &&
+                    cartasMesmoNipe[i].Numero == ECarta.Dois &&
+                    cartasMesmoNipe[i + 1].Numero == ECarta.Tres &&
+                    cartasMesmoNipe[i + 2].Numero == ECarta.Quatro &&
+                    cartasMesmoNipe[i + 3].Numero == ECarta.Cinco)
                 {
                     temSequencia = true;
-                    sequencia = new List<Carta>() { cartasOrdenadas[0], cartasOrdenadas[i + 1], cartasOrdenadas[i + 2], cartasOrdenadas[i + 3], cartasOrdenadas[i + 4] };
+                    sequencia = new List<Carta>() { cartasMesmoNipe[0], cartasMesmoNipe[i + 1], cartasMesmoNipe[i + 2], cartasMesmoNipe[i + 3], cartasMesmoNipe[i + 4] };
                 }
 
 
 
-                if (IsSequential(new int[] {(int) cartasOrdenadas[i].Numero,
-                                            (int)cartasOrdenadas[i + 1].Numero,
-                                            (int)cartasOrdenadas[i + 2].Numero,
-                                            (int)cartasOrdenadas[i + 3].Numero,
-                                            (int)cartasOrdenadas[i + 4].Numero }))
+                if (IsSequential(new int[] {(int) cartasMesmoNipe[i].Numero,
+                                            (int)cartasMesmoNipe[i + 1].Numero,
+                                            (int)cartasMesmoNipe[i + 2].Numero,
+                                            (int)cartasMesmoNipe[i + 3].Numero,
+                                            (int)cartasMesmoNipe[i + 4].Numero }))
                 {
 
                     temSequencia = true;
-                    sequencia = new List<Carta>() { cartasOrdenadas[i], cartasOrdenadas[i + 1], cartasOrdenadas[i + 2], cartasOrdenadas[i + 3], cartasOrdenadas[i + 4] };
+                    sequencia = new List<Carta>() { cartasMesmoNipe[i], cartasMesmoNipe[i + 1], cartasMesmoNipe[i + 2], cartasMesmoNipe[i + 3], cartasMesmoNipe[i + 4] };
                 }
 
             }
@@ -210,7 +193,7 @@ namespace WindowsFormsApp2
 
 
 
-        public (bool, List<Carta>, ENipe?) VerificarFlushOpenIA(List<Carta> cartas)
+        public (bool, List<Carta>, ENipe?) VerificarFlushOpenIA(IOrderedEnumerable<Carta> cartas)
         {
 
             // verifica se existem 5 cartas do mesmo nipe
@@ -232,18 +215,16 @@ namespace WindowsFormsApp2
         }
 
 
-        public (bool, List<Carta>) VerificarQuadraOpenIa(List<Carta> cartas)
+        public (bool, List<Carta>) VerificarQuadraOpenIa(IOrderedEnumerable<Carta> cartas)
         {
             var grupos = cartas.GroupBy(carta => carta.Numero).ToList();
             var quadra = grupos.FirstOrDefault(g => g.Count() == 4);
-            var kicker = grupos.Where(g => g.Count() == 1)
-                              .OrderByDescending(g => (int)g.Key)
-                              .FirstOrDefault()?.ToList();
 
             if (quadra != null)
             {
+                var kicker = cartas.Where(x => !quadra.Contains(x)).Last();
                 var cartasMao = quadra.ToList();
-                cartasMao.AddRange(kicker);
+                cartasMao.Add(kicker);
                 return (true, cartasMao);
             }
             else
