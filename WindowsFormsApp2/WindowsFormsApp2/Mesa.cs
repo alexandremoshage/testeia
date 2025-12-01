@@ -103,5 +103,76 @@ namespace WindowsFormsApp2
 
         }
 
+        public void ExecutarAcoesJogadores(ERodada rodada)
+        {
+            filaAcaoJogadores = ObterOrdemAcoes(rodada).ToList();
+
+            JogadorUltimoRaise = null;
+
+            while (filaAcaoJogadores.Any())
+            {
+                var jogador = filaAcaoJogadores.First();
+                filaAcaoJogadores.RemoveAt(0);
+
+                var (acao, valor) = jogador.AcaoJogador();
+                jogadorUltimaAcao = jogador;
+
+                switch (acao)
+                {
+                    case EAcao.fold:
+                        jogador.IsNaMao = false;
+                        break;
+                    case EAcao.check:
+                        break;
+                    case EAcao.call:
+                        pote += valor;
+                        jogador.Fichas -= valor;
+                        break;
+                    case EAcao.raise:
+                        apostaCorrente = valor;
+                        JogadorUltimoRaise = jogador;
+                        pote += valor;
+                        jogador.Fichas -= valor;
+
+                        foreach (var outroJogador in jogadores.Where(x => x.IsNaMao && x != jogador))
+                        {
+                            if (!filaAcaoJogadores.Contains(outroJogador))
+                            {
+                                filaAcaoJogadores.Add(outroJogador);
+                            }
+                        }
+
+                        break;
+                }
+            }
+        }
+
+        private IEnumerable<IJogador> ObterOrdemAcoes(ERodada rodada)
+        {
+            var jogadoresNaMao = jogadores
+                .Where(x => x.IsNaMao)
+                .ToList();
+
+            if (!jogadoresNaMao.Any())
+            {
+                return jogadoresNaMao;
+            }
+
+            int indiceBigBlind = jogadoresNaMao.FindIndex(x => x.Posicao == EPosicao.big);
+
+            if (indiceBigBlind < 0)
+            {
+                indiceBigBlind = 0;
+            }
+
+            int indiceInicial = rodada == ERodada.PreFlop
+                ? (indiceBigBlind + 1) % jogadoresNaMao.Count
+                : indiceBigBlind;
+
+            return Enumerable
+                .Range(0, jogadoresNaMao.Count)
+                .Select(i => jogadoresNaMao[(indiceInicial + i) % jogadoresNaMao.Count]);
+        }
+
     }
 }
