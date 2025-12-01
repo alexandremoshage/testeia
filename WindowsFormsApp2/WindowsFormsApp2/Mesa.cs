@@ -27,18 +27,6 @@ namespace WindowsFormsApp2
             jogadores.Add(new Jogador(new List<Carta> { baralho.EntregarCarta(), baralho.EntregarCarta() }, 3));
         }
 
-        public void AcionarJogadores()
-        {
-            while (filaAcaoJogadores.Count > 0)
-            {
-                ProximaAcao();
-            }
-        }
-        public void ProximaAcao()
-        {
-      
-        }
-
         public void DistribuirFloop()
         {
             bordo.Add(baralho.EntregarCarta());
