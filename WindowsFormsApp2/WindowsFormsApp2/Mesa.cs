@@ -44,7 +44,7 @@ namespace WindowsFormsApp2
             bordo.Add(baralho.EntregarCarta());
         }
 
-        public void CalcularGanhador()
+        public List<IJogador> CalcularGanhador()
         {
             List<IJogador> jogadoresNaMao = jogadores.Where(x => x.IsNaMao).ToList();
             foreach (var jogadorNaMao in jogadoresNaMao)
@@ -53,6 +53,8 @@ namespace WindowsFormsApp2
                 cartasJogador.AddRange(bordo);
                 cartasJogador.AddRange(jogadorNaMao.CartasMao);
                 IOrderedEnumerable<Carta> cartasOrdenadas = cartasJogador.OrderBy(x => x.Numero);
+
+                jogadorNaMao.Mao = Mao.nada;
 
                 var (isFlush, mao, nipe) = calculaMaos.VerificarFlushOpenIA(cartasOrdenadas);
                 var (isSequencia, sequencia) = calculaMaos.VerificarSequencia(cartasOrdenadas);
@@ -101,6 +103,40 @@ namespace WindowsFormsApp2
                 }
             }
 
+            if (!jogadoresNaMao.Any())
+            {
+                return jogadoresNaMao;
+            }
+
+            var melhorMao = jogadoresNaMao.Max(j => j.Mao);
+
+            return jogadoresNaMao
+                .Where(j => j.Mao == melhorMao)
+                .ToList();
+        }
+
+        public void DistribuirPote(IEnumerable<IJogador> ganhadores)
+        {
+            if (ganhadores == null)
+            {
+                return;
+            }
+
+            var listaGanhadores = ganhadores.ToList();
+
+            if (!listaGanhadores.Any() || pote == 0)
+            {
+                return;
+            }
+
+            decimal valorPorJogador = pote / listaGanhadores.Count;
+
+            foreach (var ganhador in listaGanhadores)
+            {
+                ganhador.Fichas += valorPorJogador;
+            }
+
+            pote = 0;
         }
 
         public void ExecutarAcoesJogadores(ERodada rodada)
@@ -145,6 +181,9 @@ namespace WindowsFormsApp2
                         break;
                 }
             }
+
+            var ganhadores = CalcularGanhador();
+            DistribuirPote(ganhadores);
         }
 
         private IEnumerable<IJogador> ObterOrdemAcoes(ERodada rodada)
@@ -156,6 +195,19 @@ namespace WindowsFormsApp2
             if (!jogadoresNaMao.Any())
             {
                 return jogadoresNaMao;
+            }
+
+            if (jogadoresNaMao.Count == 2)
+            {
+                var bigBlind = jogadoresNaMao.FirstOrDefault(x => x.Posicao == EPosicao.big);
+                var smallBlind = jogadoresNaMao.FirstOrDefault(x => x.Posicao == EPosicao.small);
+
+                if (bigBlind != null && smallBlind != null)
+                {
+                    return rodada == ERodada.PreFlop
+                        ? new List<IJogador> { bigBlind, smallBlind }
+                        : new List<IJogador> { smallBlind, bigBlind };
+                }
             }
 
             int indiceBigBlind = jogadoresNaMao.FindIndex(x => x.Posicao == EPosicao.big);
